@@ -52,6 +52,8 @@ export default function NewOrderPage() {
 
     if (res.ok) {
       setSaved(true);
+    } else {
+      alert("Gagal menyimpan pesanan. Silakan coba lagi.");
     }
   }
 
