@@ -14,6 +14,8 @@ type SavedOrder = {
   deliveryAddress: string;
   deliveryPhone: string;
   deliveryDateTime: string;
+  totalPrice: number;
+  vendorCost: number;
   createdAt: string;
 };
 
@@ -31,7 +33,8 @@ export default function OrdersListPage() {
       pic_order: "",
       vendor_name: "",
       flower_arrangement: o.greetingMessage,
-      total_price: 0,
+      total_price: o.totalPrice || 0,
+      vendor_cost: o.vendorCost || 0,
       created_at: o.createdAt,
     }));
     setOrders(mapped);

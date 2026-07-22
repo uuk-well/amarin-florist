@@ -5,16 +5,11 @@ export type Order = {
   vendor_name: string;
   flower_arrangement: string;
   total_price: number;
+  vendor_cost?: number;
   created_at: string;
 };
 
 export const mockOrders: Order[] = [];
-
-export const mockIncome = {
-  today: 0,
-  thisWeek: 0,
-  thisMonth: 0,
-};
 
 export type VendorSummary = {
   vendorId: string;
@@ -40,12 +35,4 @@ export type WeeklyPoint = {
   amount: number;
 };
 
-export const mockWeeklyIncome: WeeklyPoint[] = [
-  { label: "Sen", amount: 0 },
-  { label: "Sel", amount: 0 },
-  { label: "Rab", amount: 0 },
-  { label: "Kam", amount: 0 },
-  { label: "Jum", amount: 0 },
-  { label: "Sab", amount: 0 },
-  { label: "Min", amount: 0 },
-];
+

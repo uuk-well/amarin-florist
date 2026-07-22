@@ -129,6 +129,38 @@ export function generateInvoicePdf(order: Order, _vendorName: string | null): vo
     dy += 7;
   }
   doc.text(`Alamat: ${order.deliveryAddress || "—"}`, descX, dy + 4);
+  dy += 12;
+
+  // --- Harga ---
+  if (order.totalPrice > 0) {
+    doc.setDrawColor(200);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    const priceY = dy + 4;
+    doc.line(margin, priceY, right, priceY);
+    doc.text("Harga Jual", margin, priceY + 6);
+    doc.setFont("helvetica", "bold");
+    doc.text(formatRupiah(order.totalPrice), right, priceY + 6, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    dy = priceY + 10;
+
+    if (order.vendorCost > 0) {
+      doc.text("Harga Vendor", margin, dy);
+      doc.text(formatRupiah(order.vendorCost), right, dy, { align: "right" });
+      dy += 6;
+    }
+
+    if (order.vendorCost > 0) {
+      doc.setDrawColor(200);
+      doc.line(margin, dy, right, dy);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(225, 29, 72);
+      doc.text("Laba", margin, dy + 6);
+      doc.text(formatRupiah(order.totalPrice - order.vendorCost), right, dy + 6, { align: "right" });
+      doc.setTextColor(0);
+      dy += 10;
+    }
+  }
 
   // --- Footer: pembayaran ---
   const footY = Math.max(dy + 30, 170);

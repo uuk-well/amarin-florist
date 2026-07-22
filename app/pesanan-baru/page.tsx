@@ -15,6 +15,8 @@ const emptyDraft: NewOrderDraft = {
   deliveryDate: "",
   deliveryTime: "",
   productPhoto: null,
+  totalPrice: 0,
+  vendorCost: 0,
 };
 
 export default function NewOrderPage() {
@@ -45,6 +47,8 @@ export default function NewOrderPage() {
       deliveryDateTime: draft.deliveryDate
         ? `${draft.deliveryDate} ${draft.deliveryTime}`
         : "",
+      totalPrice: draft.totalPrice,
+      vendorCost: draft.vendorCost,
       createdAt: new Date().toISOString(),
     };
     savedOrders.unshift(newOrder);

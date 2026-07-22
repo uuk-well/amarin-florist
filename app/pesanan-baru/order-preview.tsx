@@ -17,8 +17,8 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
         picOrder: null,
         flowerArrangement: draft.greetingMessage,
         quantity: 1,
-        totalPrice: 0,
-        vendorCost: 0,
+        totalPrice: draft.totalPrice,
+        vendorCost: draft.vendorCost,
         greetingMessage: draft.greetingMessage,
         deliveryAddress: draft.deliveryAddress,
         deliveryPhone: draft.recipientPhone,
@@ -135,6 +135,39 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
                 <p>Alamat: {draft.deliveryAddress || "—"}</p>
               </div>
             </div>
+
+            <hr className="border-t border-dashed border-zinc-400" />
+
+            {/* Harga */}
+            {(draft.totalPrice > 0 || draft.vendorCost > 0) && (
+              <div className="space-y-1">
+                {draft.totalPrice > 0 && (
+                  <div className="flex justify-between">
+                    <span>Harga Jual</span>
+                    <span className="font-semibold">
+                      Rp {draft.totalPrice.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                )}
+                {draft.vendorCost > 0 && (
+                  <div className="flex justify-between text-zinc-500">
+                    <span>Harga Vendor</span>
+                    <span>Rp {draft.vendorCost.toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                {draft.totalPrice > 0 && draft.vendorCost > 0 && (
+                  <div className="flex justify-between border-t border-dashed border-zinc-300 pt-1 font-semibold text-rose-700">
+                    <span>Laba</span>
+                    <span>
+                      Rp{" "}
+                      {(draft.totalPrice - draft.vendorCost).toLocaleString(
+                        "id-ID"
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             <hr className="border-t border-dashed border-zinc-400" />
 

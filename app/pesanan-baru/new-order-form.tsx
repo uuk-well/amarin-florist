@@ -10,6 +10,8 @@ export type NewOrderDraft = {
   deliveryDate: string;
   deliveryTime: string;
   productPhoto: string | null;
+  totalPrice: number;
+  vendorCost: number;
 };
 
 const emptyDraft: NewOrderDraft = {
@@ -20,6 +22,8 @@ const emptyDraft: NewOrderDraft = {
   deliveryDate: "",
   deliveryTime: "",
   productPhoto: null,
+  totalPrice: 0,
+  vendorCost: 0,
 };
 
 type Errors = Partial<Record<keyof NewOrderDraft, string>>;
@@ -150,6 +154,29 @@ export function NewOrderForm({
           placeholder="cth. BTB Ruang ... (menyusul)"
         />
       </Field>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="Harga Jual (Rp)">
+          <input
+            type="number"
+            min={0}
+            value={draft.totalPrice || ""}
+            onChange={(e) => update("totalPrice", Number(e.target.value) || 0)}
+            className="input"
+            placeholder="0"
+          />
+        </Field>
+        <Field label="Harga Vendor (Rp)">
+          <input
+            type="number"
+            min={0}
+            value={draft.vendorCost || ""}
+            onChange={(e) => update("vendorCost", Number(e.target.value) || 0)}
+            className="input"
+            placeholder="0"
+          />
+        </Field>
+      </div>
 
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4 text-sm text-zinc-700">
         <p className="font-medium text-rose-700">Payment</p>
