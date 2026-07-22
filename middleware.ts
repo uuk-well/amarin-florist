@@ -1,55 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = [
-  "/login",
-  "/register",
-  "/lupa-password",
-  "/api/auth/login",
-  "/api/auth/register",
-];
+const PUBLIC_PATHS = ["/login", "/register", "/lupa-password"];
 
 function isPublic(pathname: string) {
-  return PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + "/")
-  );
-}
-
-// Verifikasi token tiruan: harus diawali "mock_" (diisi setelah login via /api/auth/login).
-function isValidToken(token: string | undefined): boolean {
-  return !!token && token.startsWith("mock_");
+  return PUBLIC_PATHS.some((p) => pathname === p);
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (isPublic(pathname)) {
+  // Proteksi sisi klien (RequireAuth) sudah cukup untuk halaman.
+  if (isPublic(pathname) || !pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
 
-  const authHeader = request.headers.get("authorization");
-  const bearer = authHeader?.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : undefined;
+  // API routes: cek cookie Supabase session
+  const cookies = request.cookies;
+  const hasSession = cookies.getAll().some((c) => c.name.startsWith("sb-"));
 
-  // API: tolak dengan 401 jika token tidak valid.
-  if (pathname.startsWith("/api/")) {
-    if (!isValidToken(bearer)) {
-      return NextResponse.json(
-        { error: "Tidak terautentikasi." },
-        { status: 401 }
-      );
-    }
-    return NextResponse.next();
-  }
-
-  // Halaman: guard client-side (RequireAuth) sudah cukup; middleware hanya
-  // memastikan cookie sesi ada bila nanti auth asli dipasang.
-  const token = request.cookies.get("amarin_token")?.value;
-  if (!isValidToken(token)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+  if (!hasSession) {
+    return NextResponse.json(
+      { error: "Tidak terautentikasi." },
+      { status: 401 }
+    );
   }
 
   return NextResponse.next();

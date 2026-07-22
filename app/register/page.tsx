@@ -6,14 +6,15 @@ import Link from "next/link";
 import { useAuth } from "@/app/components/auth/auth-provider";
 
 export default function RegisterPage() {
-  const { login } = useAuth();
+  const { register, login } = useAuth();
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim()) {
       setError("Nama, email, dan password wajib diisi.");
@@ -23,9 +24,13 @@ export default function RegisterPage() {
       setError("Password minimal 6 karakter.");
       return;
     }
-    // Mock register (belum terhubung backend/auth nyata)
-    login(email, name);
-    router.replace("/");
+    setError("");
+    const err = await register(email, password, name);
+    if (err) {
+      setError(err);
+      return;
+    }
+    setSuccess(true);
   }
 
   return (
@@ -45,54 +50,68 @@ export default function RegisterPage() {
           Buat akun untuk mengelola pesanan.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-zinc-700">Nama</span>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input"
-              placeholder="cth. Ibu Sari"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-zinc-700">Email</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input"
-              placeholder="nama@email.com"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-zinc-700">Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input"
-              placeholder="••••••••"
-            />
-          </label>
+        {success ? (
+          <div className="text-center space-y-4">
+            <p className="text-sm text-zinc-600">
+              Akun <strong>{email}</strong> berhasil dibuat. Silakan login.
+            </p>
+            <Link
+              href="/login"
+              className="block w-full rounded-lg bg-rose-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-600"
+            >
+              Masuk Sekarang
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-zinc-700">Nama</span>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="input"
+                placeholder="cth. Ibu Sari"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-zinc-700">Email</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input"
+                placeholder="nama@email.com"
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-zinc-700">Password</span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input"
+                placeholder="••••••••"
+              />
+            </label>
 
-          {error && <span className="text-xs text-red-500">{error}</span>}
+            {error && <span className="text-xs text-red-500">{error}</span>}
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-rose-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-600"
-          >
-            Daftar
-          </button>
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-rose-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-600"
+            >
+              Daftar
+            </button>
 
-          <Link
-            href="/login"
-            className="mt-4 block text-center text-sm font-medium text-rose-600 hover:text-rose-700"
-          >
-            Sudah punya akun? Masuk
-          </Link>
-        </form>
+            <Link
+              href="/login"
+              className="mt-4 block text-center text-sm font-medium text-rose-600 hover:text-rose-700"
+            >
+              Sudah punya akun? Masuk
+            </Link>
+          </form>
+        )}
       </div>
     </main>
   );

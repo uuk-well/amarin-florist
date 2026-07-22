@@ -12,18 +12,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       setError("Email dan password wajib diisi.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password minimal 6 karakter.");
+    setError("");
+    const err = await login(email, password);
+    if (err) {
+      setError(err);
       return;
     }
-    // Mock login (belum terhubung backend/auth nyata)
-    login(email);
     router.replace("/");
   }
 
