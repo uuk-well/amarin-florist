@@ -19,16 +19,12 @@ export function SummaryCard({
   label,
   finance,
   onChange,
-  onReset,
   icon,
-  overridden,
 }: {
   label: string;
   finance: PeriodFinance;
   onChange: (f: PeriodFinance) => void;
-  onReset?: () => void;
   icon: React.ReactNode;
-  overridden?: boolean;
 }) {
   const [editing, setEditing] = useState<"income" | "expense" | null>(null);
   const [temp, setTemp] = useState("");
@@ -57,18 +53,7 @@ export function SummaryCard({
           {icon}
         </div>
         <div className="flex flex-1 flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-zinc-500">{label}</span>
-            {overridden && onReset && (
-              <button
-                type="button"
-                onClick={onReset}
-                className="text-[10px] text-rose-500 hover:text-rose-600 underline"
-              >
-                reset
-              </button>
-            )}
-          </div>
+          <span className="text-sm font-medium text-zinc-500">{label}</span>
 
           {/* Pendapatan */}
           <div className="flex items-center justify-between">

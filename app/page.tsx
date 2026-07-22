@@ -124,7 +124,6 @@ export default function DashboardPage() {
             thisMonth={finance.thisMonth}
             thisYear={finance.thisYear}
             onChange={handleFinanceChange}
-            onReset={handleFinanceReset}
           />
 
           <section className="mt-6">
