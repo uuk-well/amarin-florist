@@ -74,10 +74,6 @@ export default function LoginPage() {
             Masuk
           </button>
         </form>
-
-        <p className="mt-4 text-center text-xs text-zinc-400">
-          Demo: isi email & password apa saja untuk masuk (mock).
-        </p>
       </div>
     </main>
   );

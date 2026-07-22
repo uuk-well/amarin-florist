@@ -85,10 +85,6 @@ export default function RegisterPage() {
             Daftar
           </button>
         </form>
-
-        <p className="mt-4 text-center text-xs text-zinc-400">
-          Demo: isi data apa saja untuk mendaftar (mock).
-        </p>
       </div>
     </main>
   );

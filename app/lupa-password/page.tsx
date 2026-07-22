@@ -135,10 +135,6 @@ export default function ForgotPasswordPage() {
             </form>
           </>
         )}
-
-        <p className="mt-4 text-center text-xs text-zinc-400">
-          Demo: alur tiruan, tidak mengirim email nyata.
-        </p>
       </div>
     </main>
   );
