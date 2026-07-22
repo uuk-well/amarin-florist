@@ -14,6 +14,7 @@ const emptyDraft: NewOrderDraft = {
   deliveryAddress: "",
   deliveryDate: "",
   deliveryTime: "",
+  productPhoto: null,
 };
 
 export default function NewOrderPage() {

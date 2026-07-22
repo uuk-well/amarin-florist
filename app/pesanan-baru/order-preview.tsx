@@ -24,7 +24,7 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
         deliveryPhone: draft.recipientPhone,
         customerEmail: null,
         shippingCost: 0,
-        productPhoto: null,
+        productPhoto: draft.productPhoto,
         createdAt: new Date().toISOString(),
         senderName: draft.senderName,
         deliveryDateTime: draft.deliveryDate
@@ -114,9 +114,17 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
 
             {/* Deskripsi */}
             <div className="flex gap-4">
-              <div className="flex h-40 w-32 shrink-0 items-center justify-center border border-zinc-300 text-xs text-zinc-400">
-                Foto Produk
-              </div>
+              {draft.productPhoto ? (
+                <img
+                  src={draft.productPhoto}
+                  alt="Produk"
+                  className="h-40 w-32 shrink-0 rounded border border-zinc-300 object-cover"
+                />
+              ) : (
+                <div className="flex h-40 w-32 shrink-0 items-center justify-center border border-zinc-300 text-xs text-zinc-400">
+                  Foto Produk
+                </div>
+              )}
               <div className="flex-1 space-y-1">
                 <p className="font-bold">KETERANGAN</p>
                 <p className="uppercase">{draft.greetingMessage || "—"}</p>

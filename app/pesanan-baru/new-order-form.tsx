@@ -9,6 +9,7 @@ export type NewOrderDraft = {
   deliveryAddress: string;
   deliveryDate: string;
   deliveryTime: string;
+  productPhoto: string | null;
 };
 
 const emptyDraft: NewOrderDraft = {
@@ -18,6 +19,7 @@ const emptyDraft: NewOrderDraft = {
   deliveryAddress: "",
   deliveryDate: "",
   deliveryTime: "",
+  productPhoto: null,
 };
 
 type Errors = Partial<Record<keyof NewOrderDraft, string>>;
@@ -161,6 +163,28 @@ export function NewOrderForm({
           )}
         </div>
       )}
+
+      <Field label="Foto Produk (opsional)">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => update("productPhoto", reader.result as string);
+            reader.readAsDataURL(file);
+          }}
+          className="input"
+        />
+        {draft.productPhoto && (
+          <img
+            src={draft.productPhoto}
+            alt="Pratinjau"
+            className="mt-2 h-24 w-24 rounded border border-zinc-200 object-cover"
+          />
+        )}
+      </Field>
 
       <div className="flex justify-end gap-3 pt-2">
         <button
