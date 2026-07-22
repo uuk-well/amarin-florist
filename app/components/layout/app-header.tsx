@@ -24,7 +24,7 @@ export function AppHeader() {
             </span>
             <span className="text-lg font-semibold text-zinc-900">Amarin Florist</span>
           </Link>
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="flex flex-wrap items-center gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}

@@ -39,6 +39,7 @@ yarn-error.log*
 # scripts
 /scripts/setup-admin.mjs
 /scripts/test-login.mjs
+/scripts/test-anon.mjs
 
 # typescript
 *.tsbuildinfo
