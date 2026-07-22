@@ -1,24 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Order } from "@/lib/models/order";
 
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
+type SavedOrder = {
+  id: string;
+  senderName: string;
+  greetingMessage: string;
+  deliveryAddress: string;
+  deliveryPhone: string;
+  deliveryDateTime: string;
+  createdAt: string;
+};
 
 export function TodayOrdersList() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<SavedOrder[]>([]);
 
   useEffect(() => {
-    fetch("/api/pesanan")
-      .then((res) => res.json())
-      .then((data) => setOrders(data.orders ?? []))
-      .catch(() => {});
+    const stored = JSON.parse(
+      localStorage.getItem("amarin_orders") || "[]"
+    );
+    setOrders(stored);
   }, []);
 
   if (orders.length === 0) {
@@ -37,12 +38,8 @@ export function TodayOrdersList() {
           className="flex items-center justify-between px-5 py-4"
         >
           <div>
-            <p className="font-medium text-zinc-900">
-              {order.senderName || order.customerName}
-            </p>
-            <p className="text-sm text-zinc-500">
-              {order.greetingMessage || order.flowerArrangement}
-            </p>
+            <p className="font-medium text-zinc-900">{order.senderName}</p>
+            <p className="text-sm text-zinc-500">{order.greetingMessage}</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-zinc-400">

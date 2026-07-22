@@ -33,7 +33,11 @@ export default function NewOrderPage() {
   }
 
   async function handleSaved() {
-    const payload = {
+    const savedOrders = JSON.parse(
+      localStorage.getItem("amarin_orders") || "[]"
+    );
+    const newOrder = {
+      id: `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(savedOrders.length + 1).padStart(2, "0")}`,
       senderName: draft.senderName,
       greetingMessage: draft.greetingMessage,
       deliveryAddress: draft.deliveryAddress,
@@ -41,20 +45,19 @@ export default function NewOrderPage() {
       deliveryDateTime: draft.deliveryDate
         ? `${draft.deliveryDate} ${draft.deliveryTime}`
         : "",
-      productPhoto: draft.productPhoto,
+      createdAt: new Date().toISOString(),
     };
+    savedOrders.unshift(newOrder);
+    localStorage.setItem("amarin_orders", JSON.stringify(savedOrders));
 
-    const res = await fetch("/api/pesanan", {
+    // Juga simpan ke server (best-effort)
+    await fetch("/api/pesanan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      body: JSON.stringify(newOrder),
+    }).catch(() => {});
 
-    if (res.ok) {
-      setSaved(true);
-    } else {
-      alert("Gagal menyimpan pesanan. Silakan coba lagi.");
-    }
+    setSaved(true);
   }
 
   return (
