@@ -12,7 +12,8 @@ const emptyDraft: NewOrderDraft = {
   senderName: "",
   recipientPhone: "",
   deliveryAddress: "",
-  deliveryDateTime: "",
+  deliveryDate: "",
+  deliveryTime: "",
 };
 
 export default function NewOrderPage() {

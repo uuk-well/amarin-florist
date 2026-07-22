@@ -7,7 +7,8 @@ export type NewOrderDraft = {
   senderName: string;
   recipientPhone: string;
   deliveryAddress: string;
-  deliveryDateTime: string;
+  deliveryDate: string;
+  deliveryTime: string;
 };
 
 const emptyDraft: NewOrderDraft = {
@@ -15,7 +16,8 @@ const emptyDraft: NewOrderDraft = {
   senderName: "",
   recipientPhone: "",
   deliveryAddress: "",
-  deliveryDateTime: "",
+  deliveryDate: "",
+  deliveryTime: "",
 };
 
 type Errors = Partial<Record<keyof NewOrderDraft, string>>;
@@ -99,13 +101,41 @@ export function NewOrderForm({
           />
         </Field>
         <Field label="Tgl &amp; Jam kirim :">
-          <input
-            type="text"
-            value={draft.deliveryDateTime}
-            onChange={(e) => update("deliveryDateTime", e.target.value)}
-            className="input"
-            placeholder="cth. Rabu, 22 Juli 2026, Pagi"
-          />
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={draft.deliveryDate}
+              onChange={(e) => update("deliveryDate", e.target.value)}
+              className="input flex-1"
+            />
+            <input
+              type="time"
+              value={draft.deliveryTime}
+              onChange={(e) => update("deliveryTime", e.target.value)}
+              className="input w-28"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const now = new Date();
+                const tz = now.toLocaleDateString("id-ID").split("/").reverse().join("-");
+                const dateParts = now.toLocaleDateString("id-ID").split("/");
+                const yyyy = dateParts[2];
+                const mm = dateParts[1].padStart(2, "0");
+                const dd = dateParts[0].padStart(2, "0");
+                update("deliveryDate", `${yyyy}-${mm}-${dd}`);
+                update(
+                  "deliveryTime",
+                  `${String(now.getHours()).padStart(2, "0")}:${String(
+                    now.getMinutes()
+                  ).padStart(2, "0")}`
+                );
+              }}
+              className="rounded-lg border border-zinc-300 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50"
+            >
+              Sekarang
+            </button>
+          </div>
         </Field>
       </div>
 

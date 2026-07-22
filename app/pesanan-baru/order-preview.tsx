@@ -27,7 +27,9 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
         productPhoto: null,
         createdAt: new Date().toISOString(),
         senderName: draft.senderName,
-        deliveryDateTime: draft.deliveryDateTime,
+        deliveryDateTime: draft.deliveryDate
+          ? `${draft.deliveryDate} ${draft.deliveryTime}`
+          : "",
       },
       null
     );
@@ -119,7 +121,9 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
                 <p className="font-bold">KETERANGAN</p>
                 <p className="uppercase">{draft.greetingMessage || "—"}</p>
                 {draft.senderName && <p>Pengirim: {draft.senderName}</p>}
-                {draft.deliveryDateTime && <p>Tgl/Jam kirim: {draft.deliveryDateTime}</p>}
+                {(draft.deliveryDate || draft.deliveryTime) && (
+                  <p>Tgl/Jam kirim: {draft.deliveryDate || "—"} {draft.deliveryTime || ""}</p>
+                )}
                 <p>Alamat: {draft.deliveryAddress || "—"}</p>
               </div>
             </div>
@@ -170,7 +174,7 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
 
             <div>
               <p className="font-medium text-zinc-500">Tgl &amp; Jam kirim :</p>
-              <p className="text-zinc-900">{draft.deliveryDateTime || "—"}</p>
+              <p className="text-zinc-900">{draft.deliveryDate || "—"} {draft.deliveryTime || ""}</p>
             </div>
 
             <div>
