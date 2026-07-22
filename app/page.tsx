@@ -1,16 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { IncomeSummary } from "./components/dashboard/income-summary";
 import { TodayOrdersList } from "./components/dashboard/today-orders-list";
 import { WeeklyIncomeChart } from "./components/dashboard/weekly-income-chart";
 import { AppHeader } from "./components/layout/app-header";
 import { RequireAuth } from "./components/auth/require-auth";
-import type { PeriodFinance } from "./components/dashboard/summary-card";
 import type { WeeklyPoint } from "@/lib/mock-data";
 
-const OVERRIDE_KEY = "amarin_finance_override";
 type Period = "today" | "thisWeek" | "thisMonth" | "thisYear";
 
 type SavedOrder = {
@@ -19,14 +17,9 @@ type SavedOrder = {
   createdAt: string;
 };
 
-type FinanceData = {
-  today: PeriodFinance;
-  thisWeek: PeriodFinance;
-  thisMonth: PeriodFinance;
-  thisYear: PeriodFinance;
-};
+type PeriodFinance = { income: number; vendorExpense: number };
 
-function calcFromOrders(orders: SavedOrder[]): FinanceData {
+function calcFromOrders(orders: SavedOrder[]): Record<Period, PeriodFinance> {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekStart = new Date(now);
@@ -36,16 +29,18 @@ function calcFromOrders(orders: SavedOrder[]): FinanceData {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const yearStart = new Date(now.getFullYear(), 0, 1);
 
-  const sum = { today: { income: 0, vendorExpense: 0 } as PeriodFinance,
-               thisWeek: { income: 0, vendorExpense: 0 } as PeriodFinance,
-               thisMonth: { income: 0, vendorExpense: 0 } as PeriodFinance,
-               thisYear: { income: 0, vendorExpense: 0 } as PeriodFinance };
+  const sum: Record<Period, PeriodFinance> = {
+    today: { income: 0, vendorExpense: 0 },
+    thisWeek: { income: 0, vendorExpense: 0 },
+    thisMonth: { income: 0, vendorExpense: 0 },
+    thisYear: { income: 0, vendorExpense: 0 },
+  };
 
   for (const o of orders) {
     const d = new Date(o.createdAt);
     if (isNaN(d.getTime())) continue;
-    const inc = o.totalPrice || 0;
-    const exp = o.vendorCost || 0;
+    const inc = Number(o.totalPrice) || 0;
+    const exp = Number(o.vendorCost) || 0;
     if (d >= todayStart) { sum.today.income += inc; sum.today.vendorExpense += exp; }
     if (d >= weekStart) { sum.thisWeek.income += inc; sum.thisWeek.vendorExpense += exp; }
     if (d >= monthStart) { sum.thisMonth.income += inc; sum.thisMonth.vendorExpense += exp; }
@@ -57,7 +52,7 @@ function calcFromOrders(orders: SavedOrder[]): FinanceData {
 const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export default function DashboardPage() {
-  const [finance, setFinance] = useState<FinanceData>({
+  const [finance, setFinance] = useState<Record<Period, PeriodFinance>>({
     today: { income: 0, vendorExpense: 0 },
     thisWeek: { income: 0, vendorExpense: 0 },
     thisMonth: { income: 0, vendorExpense: 0 },
@@ -66,38 +61,15 @@ export default function DashboardPage() {
   const [weeklyData, setWeeklyData] = useState<WeeklyPoint[]>(
     DAY_LABELS.map((label) => ({ label, amount: 0 }))
   );
-  const overridden = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const stored: SavedOrder[] = JSON.parse(
       localStorage.getItem("amarin_orders") || "[]"
     );
 
-    // Hitung otomatis dari pesanan
     const fromOrders = calcFromOrders(stored);
 
-    // Load override manual (jika ada)
-    let override: Partial<FinanceData> = {};
-    try {
-      const raw = localStorage.getItem(OVERRIDE_KEY);
-      if (raw) override = JSON.parse(raw);
-    } catch {}
-
-    // Gabung: pakai override kalau user pernah edit manual
-    const merged: FinanceData = {
-      today: override.today ?? fromOrders.today,
-      thisWeek: override.thisWeek ?? fromOrders.thisWeek,
-      thisMonth: override.thisMonth ?? fromOrders.thisMonth,
-      thisYear: override.thisYear ?? fromOrders.thisYear,
-    };
-
-    // Tandai mana yg di-override
-    if (override.today) overridden.current.add("today");
-    if (override.thisWeek) overridden.current.add("thisWeek");
-    if (override.thisMonth) overridden.current.add("thisMonth");
-    if (override.thisYear) overridden.current.add("thisYear");
-
-    setFinance(merged);
+    setFinance(fromOrders);
 
     // Chart mingguan
     const now = new Date();
@@ -117,38 +89,12 @@ export default function DashboardPage() {
 
   const handleFinanceChange = useCallback(
     (period: Period, value: PeriodFinance) => {
-      overridden.current.add(period);
-      setFinance((prev) => {
-        const next = { ...prev, [period]: value };
-
-        let override: Partial<FinanceData> = {};
-        try {
-          const raw = localStorage.getItem(OVERRIDE_KEY);
-          if (raw) override = JSON.parse(raw);
-        } catch {}
-        override[period] = value;
-        localStorage.setItem(OVERRIDE_KEY, JSON.stringify(override));
-
-        return next;
-      });
+      setFinance((prev) => ({ ...prev, [period]: value }));
     },
     []
   );
 
   const handleFinanceReset = useCallback((period: Period) => {
-    overridden.current.delete(period);
-
-    // Hapus override dari localStorage
-    try {
-      const raw = localStorage.getItem(OVERRIDE_KEY);
-      if (raw) {
-        const override = JSON.parse(raw);
-        delete override[period];
-        localStorage.setItem(OVERRIDE_KEY, JSON.stringify(override));
-      }
-    } catch {}
-
-    // Hitung ulang dari pesanan
     const stored: SavedOrder[] = JSON.parse(
       localStorage.getItem("amarin_orders") || "[]"
     );
@@ -177,7 +123,6 @@ export default function DashboardPage() {
             thisWeek={finance.thisWeek}
             thisMonth={finance.thisMonth}
             thisYear={finance.thisYear}
-            overrides={overridden.current}
             onChange={handleFinanceChange}
             onReset={handleFinanceReset}
           />
