@@ -9,9 +9,11 @@ const PAGE_SIZE = 5;
 export function PaginatedOrders({
   orders,
   onReprint,
+  onEdit,
 }: {
   orders: Order[];
   onReprint?: (order: Order) => void;
+  onEdit?: (order: Order) => void;
 }) {
   const [query, setQuery] = useState("");
   const [from, setFrom] = useState("");
@@ -98,7 +100,7 @@ export function PaginatedOrders({
         </button>
       </div>
 
-      <OrdersTable orders={visible} onReprint={onReprint} />
+      <OrdersTable orders={visible} onReprint={onReprint} onEdit={onEdit} />
 
       {totalPages > 1 && (
         <div className="mt-4 flex items-center justify-between text-sm text-zinc-600">

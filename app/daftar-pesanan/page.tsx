@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Order } from "@/lib/mock-data";
 import { PaginatedOrders } from "@/app/components/orders/paginated-orders";
 import { ReprintModal } from "@/app/components/orders/reprint-modal";
@@ -20,8 +21,16 @@ type SavedOrder = {
 };
 
 export default function OrdersListPage() {
+  const router = useRouter();
   const [reprintOrder, setReprintOrder] = useState<Order | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+
+  const handleEdit = useCallback(
+    (order: Order) => {
+      router.push(`/pesanan-baru?id=${encodeURIComponent(order.id)}`);
+    },
+    [router]
+  );
 
   useEffect(() => {
     const stored: SavedOrder[] = JSON.parse(
@@ -51,7 +60,7 @@ export default function OrdersListPage() {
           Riwayat seluruh transaksi pesanan.
         </p>
 
-        <PaginatedOrders orders={orders} onReprint={setReprintOrder} />
+        <PaginatedOrders orders={orders} onReprint={setReprintOrder} onEdit={handleEdit} />
       </div>
 
       {reprintOrder && (

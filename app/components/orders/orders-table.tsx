@@ -19,9 +19,11 @@ function formatDate(iso: string): string {
 export function OrdersTable({
   orders,
   onReprint,
+  onEdit,
 }: {
   orders: Order[];
   onReprint?: (order: Order) => void;
+  onEdit?: (order: Order) => void;
 }) {
   if (orders.length === 0) {
     return (
@@ -63,15 +65,26 @@ export function OrdersTable({
                 {formatRupiah(order.total_price)}
               </td>
               <td className="px-5 py-3 text-right">
-                {onReprint && (
-                  <button
-                    type="button"
-                    onClick={() => onReprint(order)}
-                    className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
-                  >
-                    Cetak Ulang
-                  </button>
-                )}
+                <div className="flex justify-end gap-2">
+                  {onEdit && (
+                    <button
+                      type="button"
+                      onClick={() => onEdit(order)}
+                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {onReprint && (
+                    <button
+                      type="button"
+                      onClick={() => onReprint(order)}
+                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                    >
+                      Cetak Ulang
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
