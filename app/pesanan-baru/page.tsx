@@ -8,19 +8,11 @@ import { AppHeader } from "../components/layout/app-header";
 import { RequireAuth } from "../components/auth/require-auth";
 
 const emptyDraft: NewOrderDraft = {
-  customerName: "",
-  picOrder: "",
-  flowerArrangement: "",
-  quantity: 1,
-  totalPrice: 0,
-  vendorCost: 0,
-  vendorId: "",
   greetingMessage: "",
+  senderName: "",
+  recipientPhone: "",
   deliveryAddress: "",
-  deliveryPhone: "",
-  customerEmail: "",
-  shippingCost: 0,
-  productPhoto: null,
+  deliveryDateTime: "",
 };
 
 export default function NewOrderPage() {

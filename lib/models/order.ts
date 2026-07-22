@@ -13,6 +13,8 @@ export type Order = {
   customerEmail?: string | null;
   shippingCost?: number | null;
   productPhoto?: string | null;
+  senderName?: string | null;
+  deliveryDateTime?: string | null;
   createdAt: string;
 };
 
@@ -31,4 +33,6 @@ export type OrderInput = {
   customerEmail?: string | null;
   shippingCost?: number | null;
   productPhoto?: string | null;
+  senderName?: string | null;
+  deliveryDateTime?: string | null;
 };
