@@ -18,6 +18,8 @@ type SavedOrder = {
   totalPrice: number;
   vendorCost: number;
   productPhoto?: string | null;
+  vendorId: string;
+  vendorName: string;
   createdAt: string;
 };
 
@@ -31,6 +33,8 @@ const emptyDraft: NewOrderDraft = {
   productPhoto: null,
   totalPrice: 0,
   vendorCost: 0,
+  vendorId: "",
+  vendorName: "",
 };
 
 function savedToDraft(order: SavedOrder): NewOrderDraft {
@@ -51,6 +55,8 @@ function savedToDraft(order: SavedOrder): NewOrderDraft {
     productPhoto: order.productPhoto || null,
     totalPrice: order.totalPrice || 0,
     vendorCost: order.vendorCost || 0,
+    vendorId: order.vendorId || "",
+    vendorName: order.vendorName || "",
   };
 }
 
@@ -67,6 +73,8 @@ function draftToSaved(draft: NewOrderDraft, id: string, index: number): SavedOrd
     totalPrice: draft.totalPrice,
     vendorCost: draft.vendorCost,
     productPhoto: draft.productPhoto,
+    vendorId: draft.vendorId,
+    vendorName: draft.vendorName,
     createdAt: new Date().toISOString(),
   };
 }

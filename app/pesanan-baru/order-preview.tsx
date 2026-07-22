@@ -129,6 +129,7 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
                 <p className="font-bold">KETERANGAN</p>
                 <p className="uppercase">{draft.greetingMessage || "—"}</p>
                 {draft.senderName && <p>Pengirim: {draft.senderName}</p>}
+                {draft.vendorName && <p>Vendor: {draft.vendorName}</p>}
                 {(draft.deliveryDate || draft.deliveryTime) && (
                   <p>Tgl/Jam kirim: {draft.deliveryDate || "—"} {draft.deliveryTime || ""}</p>
                 )}
@@ -180,10 +181,16 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
               <p className="whitespace-pre-wrap text-zinc-900">{draft.deliveryAddress || "—"}</p>
             </div>
 
-            <div>
-              <p className="font-medium text-zinc-500">Tgl &amp; Jam kirim :</p>
-              <p className="text-zinc-900">{draft.deliveryDate || "—"} {draft.deliveryTime || ""}</p>
-            </div>
+              <div>
+                <p className="font-medium text-zinc-500">Tgl &amp; Jam kirim :</p>
+                <p className="text-zinc-900">{draft.deliveryDate || "—"} {draft.deliveryTime || ""}</p>
+              </div>
+              {draft.vendorName && (
+                <div>
+                  <p className="font-medium text-zinc-500">Vendor :</p>
+                  <p className="text-zinc-900">{draft.vendorName}</p>
+                </div>
+              )}
 
             <div>
               <p className="font-medium text-zinc-500">Ucapan :</p>

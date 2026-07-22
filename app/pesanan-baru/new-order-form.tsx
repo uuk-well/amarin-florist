@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useVendors } from "../components/vendor/vendors-provider";
 
 export type NewOrderDraft = {
   greetingMessage: string;
@@ -12,6 +13,8 @@ export type NewOrderDraft = {
   productPhoto: string | null;
   totalPrice: number;
   vendorCost: number;
+  vendorId: string;
+  vendorName: string;
 };
 
 const emptyDraft: NewOrderDraft = {
@@ -24,6 +27,8 @@ const emptyDraft: NewOrderDraft = {
   productPhoto: null,
   totalPrice: 0,
   vendorCost: 0,
+  vendorId: "",
+  vendorName: "",
 };
 
 type Errors = Partial<Record<keyof NewOrderDraft, string>>;
@@ -178,6 +183,16 @@ export function NewOrderForm({
         </Field>
       </div>
 
+      <Field label="Vendor">
+        <VendorSelect
+          value={draft.vendorId}
+          onChange={(id, name) => {
+            update("vendorId", id);
+            update("vendorName", name);
+          }}
+        />
+      </Field>
+
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4 text-sm text-zinc-700">
         <p className="font-medium text-rose-700">Payment</p>
         <p className="mt-1">BCA = 2290294323 / a.n. Doni Candra Nugroho</p>
@@ -232,6 +247,35 @@ export function NewOrderForm({
         </button>
       </div>
     </form>
+  );
+}
+
+function VendorSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (id: string, name: string) => void;
+}) {
+  const { vendors } = useVendors();
+  const selected = vendors.find((v) => v.id === value);
+
+  return (
+    <select
+      value={value}
+      onChange={(e) => {
+        const v = vendors.find((x) => x.id === e.target.value);
+        onChange(e.target.value, v?.vendor_name || "");
+      }}
+      className="input"
+    >
+      <option value="">-- Pilih Vendor --</option>
+      {vendors.map((v) => (
+        <option key={v.id} value={v.id}>
+          {v.vendor_name} ({v.pic_name})
+        </option>
+      ))}
+    </select>
   );
 }
 
