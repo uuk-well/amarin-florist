@@ -11,9 +11,9 @@ export type Order = {
 export const mockOrders: Order[] = [];
 
 export const mockIncome = {
-  today: 0,
-  thisWeek: 0,
-  thisMonth: 0,
+  today: 1200000,
+  thisWeek: 4675000,
+  thisMonth: 18450000,
 };
 
 export type VendorSummary = {
@@ -41,11 +41,11 @@ export type WeeklyPoint = {
 };
 
 export const mockWeeklyIncome: WeeklyPoint[] = [
-  { label: "Sen", amount: 0 },
-  { label: "Sel", amount: 0 },
-  { label: "Rab", amount: 0 },
-  { label: "Kam", amount: 0 },
-  { label: "Jum", amount: 0 },
-  { label: "Sab", amount: 0 },
+  { label: "Sen", amount: 950000 },
+  { label: "Sel", amount: 1250000 },
+  { label: "Rab", amount: 620000 },
+  { label: "Kam", amount: 1480000 },
+  { label: "Jum", amount: 2100000 },
+  { label: "Sab", amount: 1745000 },
   { label: "Min", amount: 0 },
 ];
