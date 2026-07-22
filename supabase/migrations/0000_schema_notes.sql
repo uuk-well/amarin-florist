@@ -1,0 +1,38 @@
+-- Skema Database Amarin Florist (Fase 2)
+-- Ringkasan relasi antar tabel berdasar PRD (ER Diagram).
+--
+-- vendors (1) ──< (N) orders
+--   vendors.id  ──  orders.vendor_id  (FK, ON DELETE SET NULL)
+--
+-- orders (1) ──< (N) order_items
+--   orders.id  ──  order_items.order_id  (FK, ON DELETE CASCADE)
+--
+-- orders.id            : PK, format INV-YYYYMMDD-NN
+-- orders.vendor_id     : FK -> vendors.id (nullable)
+-- orders.customer_name : nama pembeli
+-- orders.pic_order     : PIC pesanan (opsional)
+-- orders.flower_arrangement : deskripsi produk bunga
+-- orders.quantity      : jumlah (agregat/ringkas)
+-- orders.total_price   : harga tagihan ke customer
+-- orders.vendor_cost   : biaya ke vendor (opsional)
+-- orders.greeting_message : teks kartu ucapan (opsional)
+-- orders.delivery_address  : alamat kurir (opsional)
+-- orders.created_at    : stempel waktu (laporan keuangan)
+--
+-- order_items.id           : PK (identity)
+-- order_items.order_id     : FK -> orders.id (cascade)
+-- order_items.flower_arrangement : item produk bunga
+-- order_items.quantity     : jumlah item
+-- order_items.unit_price   : harga satuan
+--
+-- vendors.id           : PK
+-- vendors.vendor_name  : nama toko/mitra
+-- vendors.pic_name     : nama PIC
+-- vendors.created_at   : stempel waktu
+--
+-- Migrations terkait:
+--   0001_create_orders.sql      -> tabel orders (+ FK vendor_id)
+--   0002_create_vendors.sql     -> tabel vendors
+--   0003_create_order_items.sql -> tabel order_items (+ FK order_id)
+--   0004_finance_reports.sql    -> index periode + view rekap (vendor_payment_summary, daily_income_summary)
+--   0005_create_users.sql        -> tabel users (profil, FK auth.users) + RLS
