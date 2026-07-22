@@ -1,4 +1,7 @@
-import type { Order } from "@/lib/mock-data";
+"use client";
+
+import { useEffect, useState } from "react";
+import type { Order } from "@/lib/models/order";
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -8,14 +11,16 @@ function formatRupiah(value: number): string {
   }).format(value);
 }
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+export function TodayOrdersList() {
+  const [orders, setOrders] = useState<Order[]>([]);
 
-export function TodayOrdersList({ orders }: { orders: Order[] }) {
+  useEffect(() => {
+    fetch("/api/pesanan")
+      .then((res) => res.json())
+      .then((data) => setOrders(data.orders ?? []))
+      .catch(() => {});
+  }, []);
+
   if (orders.length === 0) {
     return (
       <p className="px-5 py-8 text-center text-sm text-zinc-400">
@@ -27,16 +32,25 @@ export function TodayOrdersList({ orders }: { orders: Order[] }) {
   return (
     <ul className="divide-y divide-zinc-100">
       {orders.map((order) => (
-        <li key={order.id} className="flex items-center justify-between px-5 py-4">
+        <li
+          key={order.id}
+          className="flex items-center justify-between px-5 py-4"
+        >
           <div>
-            <p className="font-medium text-zinc-900">{order.customer_name}</p>
-            <p className="text-sm text-zinc-500">{order.flower_arrangement}</p>
+            <p className="font-medium text-zinc-900">
+              {order.senderName || order.customerName}
+            </p>
+            <p className="text-sm text-zinc-500">
+              {order.greetingMessage || order.flowerArrangement}
+            </p>
           </div>
           <div className="text-right">
-            <p className="font-semibold text-rose-600">
-              {formatRupiah(order.total_price)}
+            <p className="text-xs text-zinc-400">
+              {new Date(order.createdAt).toLocaleTimeString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
-            <p className="text-xs text-zinc-400">{formatTime(order.created_at)}</p>
           </div>
         </li>
       ))}

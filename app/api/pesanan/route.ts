@@ -12,7 +12,6 @@ export async function GET(request: Request) {
   return Response.json({ orders });
 }
 
-
 function generateInvoiceId(date = new Date()): string {
   const ymd = date.toISOString().slice(0, 10).replace(/-/g, "");
   const rand = Math.floor(Math.random() * 90 + 10);
@@ -27,36 +26,40 @@ export async function POST(request: Request) {
     return Response.json({ error: "Body tidak valid" }, { status: 400 });
   }
 
-  if (!body.customerName?.toString().trim()) {
+  if (!body.senderName?.toString().trim()) {
     return Response.json(
-      { error: "Nama pelanggan wajib diisi." },
+      { error: "Pengirim wajib diisi." },
       { status: 400 }
     );
   }
-  if (!body.flowerArrangement?.toString().trim()) {
+  if (!body.greetingMessage?.toString().trim()) {
     return Response.json(
-      { error: "Rangkaian bunga wajib diisi." },
+      { error: "Ucapan wajib diisi." },
       { status: 400 }
     );
   }
-  if (!body.totalPrice || body.totalPrice <= 0) {
+  if (!body.deliveryAddress?.toString().trim()) {
     return Response.json(
-      { error: "Total harga harus lebih dari 0." },
+      { error: "Alamat kirim wajib diisi." },
       { status: 400 }
     );
   }
 
   const input: OrderInput = {
     id: body.id?.toString().trim() || generateInvoiceId(),
-    vendorId: body.vendorId ?? null,
-    customerName: body.customerName,
-    picOrder: body.picOrder ?? null,
-    flowerArrangement: body.flowerArrangement,
-    quantity: body.quantity ?? 1,
-    totalPrice: Number(body.totalPrice),
-    vendorCost: Number(body.vendorCost ?? 0),
+    customerName: body.senderName,
+    flowerArrangement: body.greetingMessage ?? "",
+    totalPrice: 0,
+    vendorId: null,
+    picOrder: null,
+    quantity: 1,
+    vendorCost: 0,
     greetingMessage: body.greetingMessage ?? null,
     deliveryAddress: body.deliveryAddress ?? null,
+    deliveryPhone: body.deliveryPhone ?? null,
+    senderName: body.senderName ?? null,
+    deliveryDateTime: body.deliveryDateTime ?? null,
+    productPhoto: body.productPhoto ?? null,
   };
 
   const repo = new MockOrdersRepository();

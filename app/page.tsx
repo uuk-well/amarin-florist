@@ -4,7 +4,7 @@ import { TodayOrdersList } from "./components/dashboard/today-orders-list";
 import { WeeklyIncomeChart } from "./components/dashboard/weekly-income-chart";
 import { AppHeader } from "./components/layout/app-header";
 import { RequireAuth } from "./components/auth/require-auth";
-import { mockIncome, mockOrders, mockWeeklyIncome } from "@/lib/mock-data";
+import { mockIncome, mockWeeklyIncome } from "@/lib/mock-data";
 
 export default function DashboardPage() {
   return (
@@ -44,7 +44,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-              <TodayOrdersList orders={mockOrders} />
+              <TodayOrdersList />
             </div>
           </section>
         </div>

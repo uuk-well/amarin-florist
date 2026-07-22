@@ -1,5 +1,4 @@
 import type { Order, OrderInput } from "../models/order";
-import { mockOrders, type Order as RawOrder } from "../mock-data";
 
 export type OrderFilter = {
   q?: string;
@@ -13,30 +12,25 @@ export interface OrdersRepository {
   create(input: OrderInput): Promise<Order>;
 }
 
-function toModel(o: RawOrder): Order {
-  return {
-    id: o.id,
-    vendorId: null,
-    customerName: o.customer_name,
-    picOrder: o.pic_order,
-    flowerArrangement: o.flower_arrangement,
-    quantity: 1,
-    totalPrice: o.total_price,
-    vendorCost: 0,
-    greetingMessage: null,
-    deliveryAddress: null,
-    createdAt: o.created_at,
-  };
+// Global store agar data persist antar request (filesystem/write-read di Vercel terbatas)
+const globalOrders: Order[] = [];
+
+export function addSavedOrder(order: Order) {
+  globalOrders.unshift(order);
+}
+
+export function getSavedOrders(): Order[] {
+  return [...globalOrders];
 }
 
 export class MockOrdersRepository implements OrdersRepository {
   async list(filter?: OrderFilter): Promise<Order[]> {
-    let orders = mockOrders.map(toModel);
+    let orders = [...getSavedOrders()];
 
     if (filter?.q) {
       const q = filter.q.toLowerCase();
       orders = orders.filter((o) =>
-        [o.customerName, o.picOrder ?? "", o.vendorId ?? ""]
+        [o.customerName, o.picOrder ?? "", o.flowerArrangement]
           .join(" ")
           .toLowerCase()
           .includes(q)
@@ -56,7 +50,7 @@ export class MockOrdersRepository implements OrdersRepository {
   }
 
   async getById(id: string): Promise<Order | null> {
-    const all = mockOrders.map(toModel);
+    const all = getSavedOrders();
     return all.find((o) => o.id === id) ?? null;
   }
 
@@ -72,8 +66,15 @@ export class MockOrdersRepository implements OrdersRepository {
       vendorCost: input.vendorCost ?? 0,
       greetingMessage: input.greetingMessage ?? null,
       deliveryAddress: input.deliveryAddress ?? null,
+      deliveryPhone: input.deliveryPhone ?? null,
+      customerEmail: input.customerEmail ?? null,
+      shippingCost: input.shippingCost ?? null,
+      productPhoto: input.productPhoto ?? null,
+      senderName: input.senderName ?? null,
+      deliveryDateTime: input.deliveryDateTime ?? null,
       createdAt: new Date().toISOString(),
     };
+    addSavedOrder(order);
     return order;
   }
 }

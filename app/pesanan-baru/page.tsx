@@ -32,6 +32,29 @@ export default function NewOrderPage() {
     setDraft(emptyDraft);
   }
 
+  async function handleSaved() {
+    const payload = {
+      senderName: draft.senderName,
+      greetingMessage: draft.greetingMessage,
+      deliveryAddress: draft.deliveryAddress,
+      deliveryPhone: draft.recipientPhone,
+      deliveryDateTime: draft.deliveryDate
+        ? `${draft.deliveryDate} ${draft.deliveryTime}`
+        : "",
+      productPhoto: draft.productPhoto,
+    };
+
+    const res = await fetch("/api/pesanan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      setSaved(true);
+    }
+  }
+
   return (
     <RequireAuth>
       <main className="min-h-screen bg-zinc-50">
@@ -48,7 +71,7 @@ export default function NewOrderPage() {
             draft={draft}
             onChange={handleChange}
             onReset={handleReset}
-            onSaved={() => setSaved(true)}
+            onSaved={handleSaved}
           />
           <OrderPreview draft={draft} />
         </div>
