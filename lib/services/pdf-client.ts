@@ -129,6 +129,21 @@ export function generateInvoicePdf(order: Order, _vendorName: string | null): vo
     dy += 7;
   }
   doc.text(`Alamat: ${order.deliveryAddress || "—"}`, descX, dy + 4);
+  dy += 12;
+
+  // --- Total Tagihan ---
+  if (order.totalPrice > 0) {
+    doc.setDrawColor(0);
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(margin, dy, right, dy);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(225, 29, 72);
+    doc.text("Total Tagihan", margin, dy + 8);
+    doc.text(formatRupiah(order.totalPrice), right, dy + 8, { align: "right" });
+    doc.setTextColor(0);
+    dy += 14;
+  }
 
   // --- Footer: pembayaran ---
   const footY = Math.max(dy + 30, 170);

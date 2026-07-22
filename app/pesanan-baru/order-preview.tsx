@@ -129,13 +129,24 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
                 <p className="font-bold">KETERANGAN</p>
                 <p className="uppercase">{draft.greetingMessage || "—"}</p>
                 {draft.senderName && <p>Pengirim: {draft.senderName}</p>}
-                {draft.vendorName && <p>Vendor: {draft.vendorName}</p>}
                 {(draft.deliveryDate || draft.deliveryTime) && (
                   <p>Tgl/Jam kirim: {draft.deliveryDate || "—"} {draft.deliveryTime || ""}</p>
                 )}
                 <p>Alamat: {draft.deliveryAddress || "—"}</p>
               </div>
             </div>
+
+            <hr className="border-t border-dashed border-zinc-400" />
+
+            {/* Total Tagihan */}
+            {draft.totalPrice > 0 && (
+              <div className="flex justify-between">
+                <span className="font-semibold">Total Tagihan</span>
+                <span className="text-lg font-bold text-rose-700">
+                  Rp {draft.totalPrice.toLocaleString("id-ID")}
+                </span>
+              </div>
+            )}
 
             <hr className="border-t border-dashed border-zinc-400" />
 
