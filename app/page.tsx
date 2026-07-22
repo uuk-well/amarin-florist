@@ -39,8 +39,8 @@ function calcFromOrders(orders: SavedOrder[]): Record<Period, PeriodFinance> {
   for (const o of orders) {
     const d = new Date(o.createdAt);
     if (isNaN(d.getTime())) continue;
-    const inc = Number(o.totalPrice) || 0;
-    const exp = Number(o.vendorCost) || 0;
+    const inc = Math.round(Number(o.totalPrice)) || 0;
+    const exp = Math.round(Number(o.vendorCost)) || 0;
     if (d >= todayStart) { sum.today.income += inc; sum.today.vendorExpense += exp; }
     if (d >= weekStart) { sum.thisWeek.income += inc; sum.thisWeek.vendorExpense += exp; }
     if (d >= monthStart) { sum.thisMonth.income += inc; sum.thisMonth.vendorExpense += exp; }
@@ -63,11 +63,30 @@ export default function DashboardPage() {
   );
 
   useEffect(() => {
+    // Bersihkan key lama
+    localStorage.removeItem("amarin_finance");
+    localStorage.removeItem("amarin_finance_override");
+
     const stored: SavedOrder[] = JSON.parse(
       localStorage.getItem("amarin_orders") || "[]"
     );
 
-    const fromOrders = calcFromOrders(stored);
+    // Bulatkan semua angka di data lama
+    let changed = false;
+    const cleaned = stored.map((o) => {
+      const totalPrice = Math.round(Number(o.totalPrice)) || 0;
+      const vendorCost = Math.round(Number(o.vendorCost)) || 0;
+      if (totalPrice !== o.totalPrice || vendorCost !== o.vendorCost) {
+        changed = true;
+        return { ...o, totalPrice, vendorCost };
+      }
+      return o;
+    });
+    if (changed) {
+      localStorage.setItem("amarin_orders", JSON.stringify(cleaned));
+    }
+
+    const fromOrders = calcFromOrders(cleaned);
 
     setFinance(fromOrders);
 
