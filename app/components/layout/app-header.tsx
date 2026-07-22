@@ -8,6 +8,7 @@ const navItems = [
   { href: "/pesanan-baru", label: "Pesanan Baru" },
   { href: "/daftar-pesanan", label: "Daftar Pesanan" },
   { href: "/vendor", label: "Vendor" },
+  { href: "/pembayaran-vendor", label: "Pembayaran Vendor" },
   { href: "/laporan-keuangan", label: "Laporan" },
 ];
 
