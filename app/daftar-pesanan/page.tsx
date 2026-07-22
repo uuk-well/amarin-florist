@@ -1,15 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Order } from "@/lib/mock-data";
 import { PaginatedOrders } from "@/app/components/orders/paginated-orders";
 import { ReprintModal } from "@/app/components/orders/reprint-modal";
 import { AppHeader } from "@/app/components/layout/app-header";
 import { RequireAuth } from "@/app/components/auth/require-auth";
-import { mockOrders } from "@/lib/mock-data";
+
+type SavedOrder = {
+  id: string;
+  senderName: string;
+  greetingMessage: string;
+  deliveryAddress: string;
+  deliveryPhone: string;
+  deliveryDateTime: string;
+  createdAt: string;
+};
 
 export default function OrdersListPage() {
   const [reprintOrder, setReprintOrder] = useState<Order | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const stored: SavedOrder[] = JSON.parse(
+      localStorage.getItem("amarin_orders") || "[]"
+    );
+    const mapped: Order[] = stored.map((o) => ({
+      id: o.id,
+      customer_name: o.senderName,
+      pic_order: "",
+      vendor_name: "",
+      flower_arrangement: o.greetingMessage,
+      total_price: 0,
+      created_at: o.createdAt,
+    }));
+    setOrders(mapped);
+  }, []);
 
   return (
     <RequireAuth>
@@ -22,7 +48,7 @@ export default function OrdersListPage() {
           Riwayat seluruh transaksi pesanan.
         </p>
 
-        <PaginatedOrders orders={mockOrders} onReprint={setReprintOrder} />
+        <PaginatedOrders orders={orders} onReprint={setReprintOrder} />
       </div>
 
       {reprintOrder && (
