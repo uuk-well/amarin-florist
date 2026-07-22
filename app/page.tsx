@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IncomeSummary } from "./components/dashboard/income-summary";
 import { TodayOrdersList } from "./components/dashboard/today-orders-list";
@@ -10,7 +10,14 @@ import { RequireAuth } from "./components/auth/require-auth";
 import type { PeriodFinance } from "./components/dashboard/summary-card";
 import type { WeeklyPoint } from "@/lib/mock-data";
 
-const STORAGE_KEY = "amarin_finance";
+const OVERRIDE_KEY = "amarin_finance_override";
+type Period = "today" | "thisWeek" | "thisMonth" | "thisYear";
+
+type SavedOrder = {
+  totalPrice?: number;
+  vendorCost?: number;
+  createdAt: string;
+};
 
 type FinanceData = {
   today: PeriodFinance;
@@ -19,72 +26,135 @@ type FinanceData = {
   thisYear: PeriodFinance;
 };
 
-function defaultFinance(): FinanceData {
-  return {
-    today: { income: 0, vendorExpense: 0 },
-    thisWeek: { income: 0, vendorExpense: 0 },
-    thisMonth: { income: 0, vendorExpense: 0 },
-    thisYear: { income: 0, vendorExpense: 0 },
-  };
-}
+function calcFromOrders(orders: SavedOrder[]): FinanceData {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(now);
+  const day = weekStart.getDay();
+  weekStart.setDate(weekStart.getDate() + (day === 0 ? -6 : 1 - day));
+  weekStart.setHours(0, 0, 0, 0);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const yearStart = new Date(now.getFullYear(), 0, 1);
 
-function loadFinance(): FinanceData {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch {}
-  return defaultFinance();
-}
+  const sum = { today: { income: 0, vendorExpense: 0 } as PeriodFinance,
+               thisWeek: { income: 0, vendorExpense: 0 } as PeriodFinance,
+               thisMonth: { income: 0, vendorExpense: 0 } as PeriodFinance,
+               thisYear: { income: 0, vendorExpense: 0 } as PeriodFinance };
 
-function saveFinance(data: FinanceData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  for (const o of orders) {
+    const d = new Date(o.createdAt);
+    if (isNaN(d.getTime())) continue;
+    const inc = o.totalPrice || 0;
+    const exp = o.vendorCost || 0;
+    if (d >= todayStart) { sum.today.income += inc; sum.today.vendorExpense += exp; }
+    if (d >= weekStart) { sum.thisWeek.income += inc; sum.thisWeek.vendorExpense += exp; }
+    if (d >= monthStart) { sum.thisMonth.income += inc; sum.thisMonth.vendorExpense += exp; }
+    if (d >= yearStart) { sum.thisYear.income += inc; sum.thisYear.vendorExpense += exp; }
+  }
+  return sum;
 }
 
 const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export default function DashboardPage() {
-  const [finance, setFinance] = useState<FinanceData>(defaultFinance);
+  const [finance, setFinance] = useState<FinanceData>({
+    today: { income: 0, vendorExpense: 0 },
+    thisWeek: { income: 0, vendorExpense: 0 },
+    thisMonth: { income: 0, vendorExpense: 0 },
+    thisYear: { income: 0, vendorExpense: 0 },
+  });
   const [weeklyData, setWeeklyData] = useState<WeeklyPoint[]>(
     DAY_LABELS.map((label) => ({ label, amount: 0 }))
   );
+  const overridden = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    setFinance(loadFinance());
-
-    const stored: { totalPrice?: number; createdAt: string }[] = JSON.parse(
+    const stored: SavedOrder[] = JSON.parse(
       localStorage.getItem("amarin_orders") || "[]"
     );
 
+    // Hitung otomatis dari pesanan
+    const fromOrders = calcFromOrders(stored);
+
+    // Load override manual (jika ada)
+    let override: Partial<FinanceData> = {};
+    try {
+      const raw = localStorage.getItem(OVERRIDE_KEY);
+      if (raw) override = JSON.parse(raw);
+    } catch {}
+
+    // Gabung: pakai override kalau user pernah edit manual
+    const merged: FinanceData = {
+      today: override.today ?? fromOrders.today,
+      thisWeek: override.thisWeek ?? fromOrders.thisWeek,
+      thisMonth: override.thisMonth ?? fromOrders.thisMonth,
+      thisYear: override.thisYear ?? fromOrders.thisYear,
+    };
+
+    // Tandai mana yg di-override
+    if (override.today) overridden.current.add("today");
+    if (override.thisWeek) overridden.current.add("thisWeek");
+    if (override.thisMonth) overridden.current.add("thisMonth");
+    if (override.thisYear) overridden.current.add("thisYear");
+
+    setFinance(merged);
+
+    // Chart mingguan
     const now = new Date();
     const weekStart = new Date(now);
     const day = weekStart.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    weekStart.setDate(weekStart.getDate() + diff);
+    weekStart.setDate(weekStart.getDate() + (day === 0 ? -6 : 1 - day));
     weekStart.setHours(0, 0, 0, 0);
-
     const dayTotals = DAY_LABELS.map(() => 0);
-
-    for (const order of stored) {
-      const createdAt = new Date(order.createdAt);
-      if (!isNaN(createdAt.getTime()) && createdAt >= weekStart) {
-        const dayIdx = createdAt.getDay();
-        dayTotals[dayIdx] += order.totalPrice || 0;
+    for (const o of stored) {
+      const d = new Date(o.createdAt);
+      if (!isNaN(d.getTime()) && d >= weekStart) {
+        dayTotals[d.getDay()] += o.totalPrice || 0;
       }
     }
-
     setWeeklyData(DAY_LABELS.map((label, i) => ({ label, amount: dayTotals[i] })));
   }, []);
 
   const handleFinanceChange = useCallback(
-    (period: keyof FinanceData, value: PeriodFinance) => {
+    (period: Period, value: PeriodFinance) => {
+      overridden.current.add(period);
       setFinance((prev) => {
         const next = { ...prev, [period]: value };
-        saveFinance(next);
+
+        let override: Partial<FinanceData> = {};
+        try {
+          const raw = localStorage.getItem(OVERRIDE_KEY);
+          if (raw) override = JSON.parse(raw);
+        } catch {}
+        override[period] = value;
+        localStorage.setItem(OVERRIDE_KEY, JSON.stringify(override));
+
         return next;
       });
     },
     []
   );
+
+  const handleFinanceReset = useCallback((period: Period) => {
+    overridden.current.delete(period);
+
+    // Hapus override dari localStorage
+    try {
+      const raw = localStorage.getItem(OVERRIDE_KEY);
+      if (raw) {
+        const override = JSON.parse(raw);
+        delete override[period];
+        localStorage.setItem(OVERRIDE_KEY, JSON.stringify(override));
+      }
+    } catch {}
+
+    // Hitung ulang dari pesanan
+    const stored: SavedOrder[] = JSON.parse(
+      localStorage.getItem("amarin_orders") || "[]"
+    );
+    const fromOrders = calcFromOrders(stored);
+    setFinance((prev) => ({ ...prev, [period]: fromOrders[period] }));
+  }, []);
 
   return (
     <RequireAuth>
@@ -107,7 +177,9 @@ export default function DashboardPage() {
             thisWeek={finance.thisWeek}
             thisMonth={finance.thisMonth}
             thisYear={finance.thisYear}
+            overrides={overridden.current}
             onChange={handleFinanceChange}
+            onReset={handleFinanceReset}
           />
 
           <section className="mt-6">
