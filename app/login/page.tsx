@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/app/components/auth/auth-provider";
 
 export default function LoginPage() {
@@ -73,6 +74,21 @@ export default function LoginPage() {
           >
             Masuk
           </button>
+
+          <div className="flex flex-col items-center gap-2 pt-2 text-sm">
+            <Link
+              href="/register"
+              className="font-medium text-rose-600 hover:text-rose-700"
+            >
+              Daftar Akun Baru
+            </Link>
+            <Link
+              href="/lupa-password"
+              className="font-medium text-rose-600 hover:text-rose-700"
+            >
+              Lupa Password?
+            </Link>
+          </div>
         </form>
       </div>
     </main>

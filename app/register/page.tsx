@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/app/components/auth/auth-provider";
 
 export default function RegisterPage() {
@@ -84,6 +85,13 @@ export default function RegisterPage() {
           >
             Daftar
           </button>
+
+          <Link
+            href="/login"
+            className="mt-4 block text-center text-sm font-medium text-rose-600 hover:text-rose-700"
+          >
+            Sudah punya akun? Masuk
+          </Link>
         </form>
       </div>
     </main>

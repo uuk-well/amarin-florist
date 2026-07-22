@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Step = "request" | "reset";
 
@@ -135,6 +136,13 @@ export default function ForgotPasswordPage() {
             </form>
           </>
         )}
+
+        <Link
+          href="/login"
+          className="mt-4 block text-center text-sm font-medium text-rose-600 hover:text-rose-700"
+        >
+          Kembali ke halaman masuk
+        </Link>
       </div>
     </main>
   );
