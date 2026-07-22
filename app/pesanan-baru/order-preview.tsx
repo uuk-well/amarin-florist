@@ -138,39 +138,6 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
 
             <hr className="border-t border-dashed border-zinc-400" />
 
-            {/* Harga */}
-            {(draft.totalPrice > 0 || draft.vendorCost > 0) && (
-              <div className="space-y-1">
-                {draft.totalPrice > 0 && (
-                  <div className="flex justify-between">
-                    <span>Harga Jual</span>
-                    <span className="font-semibold">
-                      Rp {draft.totalPrice.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                )}
-                {draft.vendorCost > 0 && (
-                  <div className="flex justify-between text-zinc-500">
-                    <span>Harga Vendor</span>
-                    <span>Rp {draft.vendorCost.toLocaleString("id-ID")}</span>
-                  </div>
-                )}
-                {draft.totalPrice > 0 && draft.vendorCost > 0 && (
-                  <div className="flex justify-between border-t border-dashed border-zinc-300 pt-1 font-semibold text-rose-700">
-                    <span>Laba</span>
-                    <span>
-                      Rp{" "}
-                      {(draft.totalPrice - draft.vendorCost).toLocaleString(
-                        "id-ID"
-                      )}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <hr className="border-t border-dashed border-zinc-400" />
-
             {/* Payment */}
             <div>
               <p className="font-semibold">Payment</p>
