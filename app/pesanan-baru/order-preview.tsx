@@ -4,14 +4,6 @@ import { useState } from "react";
 import type { NewOrderDraft } from "./new-order-form";
 import { generateInvoicePdf } from "@/lib/services/pdf-client";
 
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
   const [tab, setTab] = useState<"invoice" | "surat">("invoice");
   const id = `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}`;
@@ -80,83 +72,85 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
 
       <div className="p-6 print-area">
         {tab === "invoice" ? (
-          <div className="space-y-5 text-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-500 text-base font-bold text-white">
+          <div className="space-y-4 text-sm">
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <div className="flex gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-500 text-lg font-bold text-white">
                   A
                 </span>
                 <div>
-                  <p className="font-bold text-zinc-900">AMARIN FLORIST</p>
+                  <p className="text-base font-bold">AMARIN FLORIST</p>
+                  <p className="text-xs text-zinc-500">Jl. Kemandoran II No. 25E, Jakarta Selatan</p>
+                  <p className="text-xs text-zinc-500">Telp. 08111234547</p>
                   <p className="text-xs text-zinc-500">www.bungatangerang.com</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold">INVOICE</p>
-                <p className="text-xs text-zinc-500">{id}</p>
+                <p className="text-2xl font-bold">INVOICE</p>
+                <p className="text-xs text-zinc-500">No. Invoice: {id}</p>
+                <p className="text-xs text-zinc-500">Tanggal: {new Date().toLocaleDateString("id-ID")}</p>
               </div>
             </div>
 
-            <hr className="border-t border-dashed border-zinc-300" />
+            <hr className="border-t border-dashed border-zinc-400" />
 
-            <div>
-              <p className="font-medium text-zinc-500">Ucapan :</p>
-              <p className="whitespace-pre-wrap text-zinc-900">
-                {draft.greetingMessage || "—"}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            {/* Info pelanggan */}
+            <div className="flex justify-between">
               <div>
-                <p className="font-medium text-zinc-500">Pengirim :</p>
-                <p className="text-zinc-900">{draft.senderName || "—"}</p>
+                <p className="font-semibold">Kepada Yth,</p>
+                <p>{draft.senderName || "—"}</p>
               </div>
-              <div>
-                <p className="font-medium text-zinc-500">No. HP Penerima :</p>
-                <p className="text-zinc-900">{draft.recipientPhone || "—"}</p>
+              {draft.recipientPhone && (
+                <div className="text-right text-xs text-zinc-500">
+                  <p>No. HP Penerima: {draft.recipientPhone}</p>
+                </div>
+              )}
+            </div>
+
+            <hr className="border-t border-dashed border-zinc-400" />
+
+            {/* Deskripsi */}
+            <div className="flex gap-4">
+              <div className="flex h-40 w-32 shrink-0 items-center justify-center border border-zinc-300 text-xs text-zinc-400">
+                Foto Produk
+              </div>
+              <div className="flex-1 space-y-1">
+                <p className="font-bold">KETERANGAN</p>
+                <p className="uppercase">{draft.greetingMessage || "—"}</p>
+                {draft.senderName && <p>Pengirim: {draft.senderName}</p>}
+                {draft.deliveryDateTime && <p>Tgl/Jam kirim: {draft.deliveryDateTime}</p>}
+                <p>Alamat: {draft.deliveryAddress || "—"}</p>
               </div>
             </div>
 
+            <hr className="border-t border-dashed border-zinc-400" />
+
+            {/* Payment */}
             <div>
-              <p className="font-medium text-zinc-500">Alamat kirim :</p>
-              <p className="whitespace-pre-wrap text-zinc-900">
-                {draft.deliveryAddress || "—"}
-              </p>
-            </div>
-
-            <div>
-              <p className="font-medium text-zinc-500">Tgl &amp; Jam kirim :</p>
-              <p className="text-zinc-900">{draft.deliveryDateTime || "—"}</p>
-            </div>
-
-            <hr className="border-t border-dashed border-zinc-300" />
-
-            <div className="rounded-lg bg-rose-50 p-4">
-              <p className="font-medium text-rose-700">Payment</p>
-              <p className="mt-1 text-zinc-700">
-                BCA = 2290294323 / a.n. Doni Candra Nugroho
-              </p>
+              <p className="font-semibold">Payment</p>
+              <p className="text-xs">BCA = 2290294323 / a.n. Doni Candra Nugroho</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-5 text-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-500 text-base font-bold text-white">
+          <div className="space-y-4 text-sm">
+            <div className="flex items-start justify-between">
+              <div className="flex gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-500 text-lg font-bold text-white">
                   A
                 </span>
                 <div>
-                  <p className="font-bold text-zinc-900">AMARIN FLORIST</p>
-                  <p className="text-xs text-zinc-500">www.bungatangerang.com</p>
+                  <p className="text-base font-bold">AMARIN FLORIST</p>
+                  <p className="text-xs text-zinc-500">Jl. Kemandoran II No. 25E, Jakarta Selatan</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold">SURAT JALAN</p>
-                <p className="text-xs text-zinc-500">{id}</p>
+                <p className="text-2xl font-bold">SURAT JALAN</p>
+                <p className="text-xs text-zinc-500">No. {id}</p>
               </div>
             </div>
 
-            <hr className="border-t border-dashed border-zinc-300" />
+            <hr className="border-t border-dashed border-zinc-400" />
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -171,9 +165,7 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
 
             <div>
               <p className="font-medium text-zinc-500">Alamat kirim :</p>
-              <p className="whitespace-pre-wrap text-zinc-900">
-                {draft.deliveryAddress || "—"}
-              </p>
+              <p className="whitespace-pre-wrap text-zinc-900">{draft.deliveryAddress || "—"}</p>
             </div>
 
             <div>
@@ -183,9 +175,7 @@ export function OrderPreview({ draft }: { draft: NewOrderDraft }) {
 
             <div>
               <p className="font-medium text-zinc-500">Ucapan :</p>
-              <p className="whitespace-pre-wrap text-zinc-900">
-                {draft.greetingMessage || "—"}
-              </p>
+              <p className="whitespace-pre-wrap text-zinc-900">{draft.greetingMessage || "—"}</p>
             </div>
           </div>
         )}

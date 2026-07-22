@@ -34,92 +34,112 @@ export function generateInvoicePdf(order: Order, _vendorName: string | null): vo
   const margin = 16;
   const right = 210 - margin;
 
-  // Header
+  // --- Header kiri: logo + info toko ---
   doc.setFillColor(225, 29, 72);
-  doc.circle(margin + 5, 15, 5, "F");
+  doc.circle(margin + 6, 18, 6, "F");
   doc.setTextColor(255);
-  doc.setFontSize(10);
-  doc.text("A", margin + 5, 18, { align: "center" });
-  doc.setTextColor(0);
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text(STORE.name, margin + 14, 14);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(90);
-  doc.text(STORE.address, margin + 14, 19);
-  doc.text(`Telp. ${STORE.phone}`, margin + 14, 24);
-  doc.text(STORE.web, margin + 14, 29);
+  doc.setFontSize(12);
+  doc.text("A", margin + 6, 22, { align: "center" });
 
   doc.setTextColor(0);
-  doc.setFontSize(20);
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("INVOICE", right, 14, { align: "right" });
+  doc.text(STORE.name, margin + 16, 16);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(90);
-  doc.text(order.id, right, 20, { align: "right" });
-  doc.text(formatDate(order.createdAt), right, 25, { align: "right" });
+  doc.text(STORE.address, margin + 16, 22);
+  doc.text(`Telp. ${STORE.phone}`, margin + 16, 27);
+  doc.text(STORE.web, margin + 16, 32);
+
+  // --- Header kanan: judul invoice + detail ---
+  doc.setTextColor(0);
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("INVOICE", right, 18, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(90);
+  doc.text(`No. Invoice: ${order.id}`, right, 26, { align: "right" });
+  doc.text(`Tanggal: ${formatDate(order.createdAt)}`, right, 31, {
+    align: "right",
+  });
 
   doc.setDrawColor(0);
   doc.setLineDashPattern([1, 1], 0);
-  doc.line(margin, 38, right, 38);
+  doc.line(margin, 44, right, 44);
 
-  // Body
-  let y = 48;
+  // --- Info pelanggan ---
+  doc.setTextColor(0);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("Ucapan :", margin, y);
+  doc.text("Kepada Yth,", margin, 54);
   doc.setFont("helvetica", "normal");
-  y += 5;
-  const greet = order.greetingMessage ?? order.flowerArrangement ?? "—";
-  const greetLines = doc.splitTextToSize(greet, right - margin);
-  doc.text(greetLines, margin, y);
-  y += greetLines.length * 5 + 6;
-
-  if (order.senderName) {
-    doc.setFont("helvetica", "bold");
-    doc.text("Pengirim :", margin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(order.senderName, margin + 40, y);
-    y += 7;
-  }
+  doc.text(order.customerName || "", margin, 60);
 
   if (order.deliveryPhone) {
-    doc.setFont("helvetica", "bold");
-    doc.text("No. HP Penerima :", margin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(order.deliveryPhone, margin + 55, y);
-    y += 7;
+    doc.setTextColor(90);
+    doc.setFontSize(9);
+    doc.text(`No. HP Penerima: ${order.deliveryPhone}`, right, 54, { align: "right" });
   }
 
-  if (order.deliveryDateTime) {
-    doc.setFont("helvetica", "bold");
-    doc.text("Tgl & Jam kirim :", margin, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(order.deliveryDateTime, margin + 50, y);
-    y += 7;
-  }
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Alamat kirim :", margin, y);
-  doc.setFont("helvetica", "normal");
-  y += 5;
-  const addr = order.deliveryAddress ?? "—";
-  const addrLines = doc.splitTextToSize(addr, right - margin);
-  doc.text(addrLines, margin, y);
-  y += addrLines.length * 5 + 8;
-
-  // Payment info
   doc.setDrawColor(0);
-  doc.line(margin, y, right, y);
-  y += 8;
+  doc.line(margin, 68, right, 68);
+
+  // --- Foto + deskripsi ---
+  const photoX = margin;
+  const photoY = 74;
+  const photoW = 50;
+  const photoH = 65;
+  doc.setDrawColor(200);
+  doc.rect(photoX, photoY, photoW, photoH);
+  if (order.productPhoto) {
+    try {
+      doc.addImage(order.productPhoto, "JPEG", photoX, photoY, photoW, photoH);
+    } catch {
+      doc.setTextColor(160);
+      doc.setFontSize(8);
+      doc.text("Foto Produk", photoX + photoW / 2, photoY + photoH / 2, { align: "center" });
+    }
+  } else {
+    doc.setTextColor(160);
+    doc.setFontSize(8);
+    doc.text("Foto Produk", photoX + photoW / 2, photoY + photoH / 2, { align: "center" });
+  }
+
+  const descX = photoX + photoW + 10;
+  doc.setTextColor(0);
   doc.setFont("helvetica", "bold");
-  doc.text("Payment", margin, y);
+  doc.setFontSize(10);
+  doc.text("KETERANGAN", descX, photoY + 4);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  y += 5;
-  doc.text("BCA = 2290294323 / a.n. Doni Candra Nugroho", margin, y);
+
+  const msg = order.greetingMessage || "—";
+  const msgLines = doc.splitTextToSize(msg.toUpperCase(), right - descX);
+  doc.text(msgLines, descX, photoY + 11);
+  let dy = photoY + 11 + msgLines.length * 5;
+
+  if (order.senderName) {
+    doc.text(`Pengirim: ${order.senderName}`, descX, dy + 4);
+    dy += 7;
+  }
+  if (order.deliveryDateTime) {
+    doc.text(`Tgl/Jam kirim: ${order.deliveryDateTime}`, descX, dy + 4);
+    dy += 7;
+  }
+  doc.text(`Alamat: ${order.deliveryAddress || "—"}`, descX, dy + 4);
+
+  // --- Footer: pembayaran ---
+  const footY = Math.max(dy + 30, 170);
+  doc.setDrawColor(0);
+  doc.line(margin, footY, right, footY);
+  doc.setTextColor(0);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("Payment", margin, footY + 8);
+  doc.setFont("helvetica", "normal");
+  doc.text(`BCA = 2290294323 / a.n. Doni Candra Nugroho`, margin, footY + 14);
 
   doc.save(`invoice-${order.id}.pdf`);
 }
