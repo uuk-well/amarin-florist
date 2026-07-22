@@ -1,83 +1,90 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { IncomeSummary } from "./components/dashboard/income-summary";
 import { TodayOrdersList } from "./components/dashboard/today-orders-list";
 import { WeeklyIncomeChart } from "./components/dashboard/weekly-income-chart";
 import { AppHeader } from "./components/layout/app-header";
 import { RequireAuth } from "./components/auth/require-auth";
+import type { PeriodFinance } from "./components/dashboard/summary-card";
 import type { WeeklyPoint } from "@/lib/mock-data";
 
-type SavedOrder = {
-  id: string;
-  senderName: string;
-  greetingMessage: string;
-  deliveryAddress: string;
-  deliveryPhone: string;
-  deliveryDateTime: string;
-  createdAt: string;
-  totalPrice: number;
-  vendorCost: number;
+const STORAGE_KEY = "amarin_finance";
+
+type FinanceData = {
+  today: PeriodFinance;
+  thisWeek: PeriodFinance;
+  thisMonth: PeriodFinance;
+  thisYear: PeriodFinance;
 };
 
-function getWeekStart(d: Date): Date {
-  const start = new Date(d);
-  const day = start.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  start.setDate(start.getDate() + diff);
-  start.setHours(0, 0, 0, 0);
-  return start;
+function defaultFinance(): FinanceData {
+  return {
+    today: { income: 0, vendorExpense: 0 },
+    thisWeek: { income: 0, vendorExpense: 0 },
+    thisMonth: { income: 0, vendorExpense: 0 },
+    thisYear: { income: 0, vendorExpense: 0 },
+  };
 }
 
-function getMonthStart(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), 1);
+function loadFinance(): FinanceData {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return defaultFinance();
+}
+
+function saveFinance(data: FinanceData) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export default function DashboardPage() {
-  const [todayIncome, setTodayIncome] = useState(0);
-  const [weekIncome, setWeekIncome] = useState(0);
-  const [monthIncome, setMonthIncome] = useState(0);
+  const [finance, setFinance] = useState<FinanceData>(defaultFinance);
   const [weeklyData, setWeeklyData] = useState<WeeklyPoint[]>(
     DAY_LABELS.map((label) => ({ label, amount: 0 }))
   );
 
   useEffect(() => {
-    const stored: SavedOrder[] = JSON.parse(
+    setFinance(loadFinance());
+
+    const stored: { totalPrice?: number; createdAt: string }[] = JSON.parse(
       localStorage.getItem("amarin_orders") || "[]"
     );
 
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekStart = getWeekStart(now);
-    const monthStart = getMonthStart(now);
+    const weekStart = new Date(now);
+    const day = weekStart.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    weekStart.setDate(weekStart.getDate() + diff);
+    weekStart.setHours(0, 0, 0, 0);
 
-    let todaySum = 0;
-    let weekSum = 0;
-    let monthSum = 0;
     const dayTotals = DAY_LABELS.map(() => 0);
 
     for (const order of stored) {
       const createdAt = new Date(order.createdAt);
-      const price = order.totalPrice || 0;
-
-      if (createdAt >= todayStart) todaySum += price;
-      if (createdAt >= weekStart) weekSum += price;
-      if (createdAt >= monthStart) monthSum += price;
-
       if (!isNaN(createdAt.getTime()) && createdAt >= weekStart) {
         const dayIdx = createdAt.getDay();
-        dayTotals[dayIdx] += price;
+        dayTotals[dayIdx] += order.totalPrice || 0;
       }
     }
 
-    setTodayIncome(todaySum);
-    setWeekIncome(weekSum);
-    setMonthIncome(monthSum);
     setWeeklyData(DAY_LABELS.map((label, i) => ({ label, amount: dayTotals[i] })));
   }, []);
+
+  const handleFinanceChange = useCallback(
+    (period: keyof FinanceData, value: PeriodFinance) => {
+      setFinance((prev) => {
+        const next = { ...prev, [period]: value };
+        saveFinance(next);
+        return next;
+      });
+    },
+    []
+  );
 
   return (
     <RequireAuth>
@@ -96,9 +103,11 @@ export default function DashboardPage() {
           </div>
 
           <IncomeSummary
-            today={todayIncome}
-            thisWeek={weekIncome}
-            thisMonth={monthIncome}
+            today={finance.today}
+            thisWeek={finance.thisWeek}
+            thisMonth={finance.thisMonth}
+            thisYear={finance.thisYear}
+            onChange={handleFinanceChange}
           />
 
           <section className="mt-6">
